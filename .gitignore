@@ -1,0 +1,6 @@
+bin/
+build/
+SDL3/
+lib/
+src/main.c
+CMakeLists.txt
