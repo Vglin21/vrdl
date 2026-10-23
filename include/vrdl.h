@@ -19,6 +19,8 @@ typedef uint64_t qword;
 #define VRDL_DEFAULT_HBLANK            24
 #define VRDL_DEFAULT_VBLANK            16
 
+#define VRDL_DEFAULT_FRAME_RATE 60.0
+
 typedef uint32_t vrdl_color;
 
 #define vrdl_color_rgb(r, g, b) (vrdl_color)(((byte)(r) << 24) + ((byte)(g) << 16) + ((byte)(b) << 8) + 0xff)
@@ -149,23 +151,32 @@ typedef enum {
 extern bool vrdl_turn_on(int width, int height, vrdl_display_type display_type);
 extern void vrdl_turn_off(void);
 
+extern void vrdl_request_turn_off(void);
+extern bool vrdl_should_turn_off(void);
+
 extern bool vrdl_set_resolution(uint32_t width, uint32_t height);
 extern bool vrdl_set_blanking(uint32_t hblank, uint32_t vblank);
 extern bool vrdl_set_resolution_and_blanking(uint32_t width, uint32_t height, uint32_t hblank, uint32_t vblank);
 
 extern bool vrdl_is_on(void);
-extern bool vrdl_should_turn_off(void);
+extern bool vrdl_is_frame_active(void);
 extern bool vrdl_is_key_pressed(vrdl_key key);
 extern bool vrdl_is_fullscreen(void);
+extern bool vrdl_is_resizable(void);
 
 extern void vrdl_set_title(const char *title);
 extern void vrdl_set_display_size(int width, int height);
 extern void vrdl_set_display_pos(int x, int y);
 extern void vrdl_set_fullscreen(bool fullscreen);
+extern void vrdl_set_aspect_ratio(double aspect_ratio);
+extern void vrdl_set_resizable(bool resizable);
+extern void vrdl_set_frame_rate(double frame_rate);
 
 extern const char *vrdl_get_title(void);
 extern void vrdl_get_display_size(int *width, int *height);
 extern void vrdl_get_display_pos(int *x, int *y);
+extern double vrdl_get_aspect_ratio(void);
+extern double vrdl_get_frame_rate(void);
 
 extern void vrdl_draw_pixel(vrdl_color color);
 extern void vrdl_draw_pixels(vrdl_color color, size_t count);

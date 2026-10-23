@@ -8,21 +8,47 @@ typedef struct {
 
     SDL_Texture *image;
     vrdl_color *pixels;
-    size_t beam;
-    SDL_FRect image_rect;
     size_t image_area;
     size_t line_width;
+    size_t beam;
+
+    SDL_FRect image_rect;
+    SDL_FRect display_rect;
+    double aspect_ratio;
 
     struct {
         uint32_t h;
         uint32_t v;
     } blank;
 
+    double frame_rate;
+    double time_step;
+    Uint64 frequency;
+    Uint64 frame_end;
+    double accumulator;
+
     bool should_turn_off;
     const bool *keyboard;
 } vrdl_state;
 
 static vrdl_state vrdl = (vrdl_state){0};
+
+static void vrdl_resize(void) {
+    dword width, height;
+    SDL_GetWindowSize(vrdl.display, &width, &height);
+    
+    if (height * vrdl.aspect_ratio > width) {
+        vrdl.display_rect.x = 0;
+        vrdl.display_rect.w = width;
+        vrdl.display_rect.h = width / vrdl.aspect_ratio;
+        vrdl.display_rect.y = (height >> 1) - vrdl.display_rect.h / 2;
+    } else {
+        vrdl.display_rect.y = 0;
+        vrdl.display_rect.h = height;
+        vrdl.display_rect.w = height * vrdl.aspect_ratio;
+        vrdl.display_rect.x = (width >> 1) - vrdl.display_rect.w / 2;
+    }
+}
 
 static bool vrdl_update_image(void) {
     uint32_t image_height;
@@ -96,6 +122,14 @@ bool vrdl_turn_on(int width, int height, vrdl_display_type display_type) {
 
     vrdl.display_type = display_type;
     vrdl.should_turn_off = false;
+    vrdl.aspect_ratio = (double)width / height;
+    vrdl.frame_rate = VRDL_DEFAULT_FRAME_RATE;
+    vrdl.time_step = 1.0 / vrdl.frame_rate;
+    vrdl.frequency = SDL_GetPerformanceFrequency();
+    vrdl.frame_end = SDL_GetPerformanceCounter();
+    vrdl.accumulator = 0.0;
+
+    vrdl_resize();
 
     return true;
 }
@@ -106,6 +140,13 @@ void vrdl_turn_off(void) {
     if (vrdl.display) SDL_DestroyWindow(vrdl.display);
     if (vrdl_is_on()) SDL_Quit();
     memset(&vrdl, 0, sizeof(vrdl));
+}
+
+void vrdl_request_turn_off(void) {
+    vrdl.should_turn_off = true;
+}
+bool vrdl_should_turn_off(void) {
+    return vrdl.should_turn_off;
 }
 
 bool vrdl_set_resolution(uint32_t width, uint32_t height) {
@@ -154,14 +195,17 @@ bool vrdl_set_resolution_and_blanking(uint32_t width, uint32_t height, uint32_t 
 bool vrdl_is_on(void) {
     return SDL_WasInit(0) != 0;
 }
-bool vrdl_should_turn_off(void) {
-    return vrdl.should_turn_off;
+bool vrdl_is_frame_active(void) {
+    return vrdl.accumulator >= vrdl.time_step;
 }
 bool vrdl_is_key_pressed(vrdl_key key) {
     return (vrdl.keyboard && key < SDL_SCANCODE_COUNT) ? vrdl.keyboard[key] : false;
 }
 bool vrdl_is_fullscreen(void) {
     return vrdl_is_on() ? SDL_GetWindowFlags(vrdl.display) & SDL_WINDOW_FULLSCREEN : false;
+}
+bool vrdl_is_resizable(void) {
+    return vrdl_is_on() ? SDL_GetWindowFlags(vrdl.display) & SDL_WINDOW_RESIZABLE : false;
 }
 
 void vrdl_set_title(const char *title) {
@@ -176,6 +220,22 @@ void vrdl_set_display_pos(int x, int y) {
 void vrdl_set_fullscreen(bool fullscreen) {
     if (vrdl_is_on()) SDL_SetWindowFullscreen(vrdl.display, fullscreen);
 }
+void vrdl_set_aspect_ratio(double aspect_ratio) {
+    if (aspect_ratio) vrdl.aspect_ratio = aspect_ratio;
+    else {
+        int width, height;
+        SDL_GetWindowSize(vrdl.display, &width, &height);
+        vrdl.aspect_ratio = (double)width / height;
+    }
+    vrdl_resize();
+}
+void vrdl_set_resizable(bool resizable) {
+    if (vrdl_is_on()) SDL_SetWindowResizable(vrdl.display, resizable);
+}
+void vrdl_set_frame_rate(double frame_rate) {
+    vrdl.frame_rate = frame_rate;
+    vrdl.time_step = 1.0 / frame_rate;
+}
 
 const char *vrdl_get_title(void) {
     return vrdl_is_on() ? SDL_GetWindowTitle(vrdl.display) : NULL;
@@ -186,41 +246,51 @@ void vrdl_get_display_size(int *width, int *height) {
 void vrdl_get_display_pos(int *x, int *y) {
     if (vrdl_is_on()) SDL_GetWindowPosition(vrdl.display, x, y);
 }
+double vrdl_get_aspect_ratio(void) { return vrdl.aspect_ratio; }
+double vrdl_get_frame_rate(void) { return vrdl.frame_rate; }
+
+#define _draw_pixel(color) \
+    vrdl.pixels[vrdl.beam++] = color; \
+    if (vrdl.beam >= vrdl.image_area) { \
+        vrdl.beam -= vrdl.image_area; \
+        if (vrdl.accumulator >= vrdl.time_step) \
+            vrdl.accumulator -= vrdl.time_step; \
+    }
 
 void vrdl_draw_pixel(vrdl_color color) {
-    if (vrdl.image) {
-        vrdl.pixels[vrdl.beam++] = color;
-        if (vrdl.beam >= vrdl.image_area)
-            vrdl.beam -= vrdl.image_area;
-    }
+    if (vrdl.image) _draw_pixel(color)
 }
 void vrdl_draw_pixels(vrdl_color color, size_t count) {
-    if (vrdl.image) for (size_t i = 0; i < count; ++i) {
-        vrdl.pixels[vrdl.beam++] = color;
-        if (vrdl.beam >= vrdl.image_area)
-            vrdl.beam -= vrdl.image_area;
-    }
+    if (vrdl.image) for (size_t i = 0; i < count; ++i) _draw_pixel(color)
 }
 void vrdl_draw_pixel_array(vrdl_color *color_array, size_t size) {
-    if (vrdl.image && color_array) for (size_t i = 0; i < size;) {
-        vrdl.pixels[vrdl.beam++] = color_array[i++];
-        if (vrdl.beam >= vrdl.image_area)
-            vrdl.beam -= vrdl.image_area;
-    }
+    if (vrdl.image && color_array) for (size_t i = 0; i < size;) _draw_pixel(color_array[i++])
 }
 
 void vrdl_update_display(void) {
     if (!vrdl_is_on()) return;
 
+    uint64_t frame_start = SDL_GetPerformanceCounter();
+    
+    double frame_time = (double)(frame_start - vrdl.frame_end) / vrdl.frequency;
+    if (frame_time > 0.25) frame_time = 0.25;
+
+    vrdl.accumulator += frame_time;
+    vrdl.frame_end = frame_start;
+
+    SDL_RenderClear(vrdl.render);
     if (vrdl.image) {
         SDL_UpdateTexture(vrdl.image, NULL, vrdl.pixels, vrdl.line_width * sizeof(vrdl_color));
-        SDL_RenderTexture(vrdl.render, vrdl.image, &vrdl.image_rect, NULL);
-        SDL_RenderPresent(vrdl.render);
+        SDL_RenderTexture(vrdl.render, vrdl.image, &vrdl.image_rect, &vrdl.display_rect);
     }
+    SDL_RenderPresent(vrdl.render);
     
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
-        if (event.type == SDL_EVENT_QUIT) vrdl.should_turn_off = true;
+        switch (event.type) {
+            case SDL_EVENT_QUIT: vrdl.should_turn_off = true; break;
+            case SDL_EVENT_WINDOW_RESIZED: vrdl_resize();
+        }
     }
 
     if (!vrdl.keyboard) vrdl.keyboard = SDL_GetKeyboardState(NULL);
