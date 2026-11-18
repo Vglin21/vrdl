@@ -2,5 +2,6 @@ bin/
 build/
 SDL3/
 lib/
-src/main.c
+src/
+include/
 CMakeLists.txt
