@@ -148,6 +148,10 @@ typedef enum {
     VRDLK_RGUI   = 231
 } vrdl_key;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern bool vrdl_turn_on(int width, int height, vrdl_display_type display_type);
 extern void vrdl_turn_off(void);
 
@@ -183,6 +187,10 @@ extern void vrdl_draw_pixels(vrdl_color color, size_t count);
 extern void vrdl_draw_pixel_array(vrdl_color *color_array, size_t size);
 
 extern void vrdl_update_display(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #ifdef VRDL_IMPLEMENTATION
 #define VRDL_IMPLEMENTATION_INCLUDED (1)
