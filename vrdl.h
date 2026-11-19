@@ -1,11 +1,11 @@
-#ifndef _VGLINS_RETRO_DISPLAY_LIB_H_
-#define _VGLINS_RETRO_DISPLAY_LIB_H_
+#ifndef VGLINS_RETRO_DISPLAY_LIB_H
+#define VGLINS_RETRO_DISPLAY_LIB_H
 
 #include <stdbool.h>
 #include <stdint.h>
 
-#ifndef _UINT_ALIASES_
-#define _UINT_ALIASES_
+#ifndef UINT_ALIASES
+#define UINT_ALIASES
 
 typedef uint8_t  byte;
 typedef uint16_t word;
@@ -14,12 +14,30 @@ typedef uint64_t qword;
 
 #endif
 
-#define VRDL_DEFAULT_RESOLUTION_WIDTH  256
-#define VRDL_DEFAULT_RESOLUTION_HEIGHT 240
-#define VRDL_DEFAULT_HBLANK            24
-#define VRDL_DEFAULT_VBLANK            16
+#ifndef VRDL_DECL
+    #ifdef VRDL_STATIC
+        #define VRDL_DECL static
+    #else 
+        #define VRDL_DECL extern
+    #endif
+#endif
 
-#define VRDL_DEFAULT_FRAME_RATE 60.0
+#ifndef VRDL_DEFAULT_RESOLUTION_WIDTH
+    #define VRDL_DEFAULT_RESOLUTION_WIDTH 256
+#endif
+#ifndef VRDL_DEFAULT_RESOLUTION_HEIGHT
+    #define VRDL_DEFAULT_RESOLUTION_HEIGHT 240
+#endif
+#ifndef VRDL_DEFAULT_HBLANK
+    #define VRDL_DEFAULT_HBLANK 24
+#endif
+#ifndef VRDL_DEFAULT_VBLANK
+    #define VRDL_DEFAULT_VBLANK 16
+#endif
+
+#ifndef VRDL_DEFAULT_FRAME_RATE
+    #define VRDL_DEFAULT_FRAME_RATE 60.0
+#endif
 
 typedef uint32_t vrdl_color;
 
@@ -152,41 +170,41 @@ typedef enum {
 extern "C" {
 #endif
 
-extern bool vrdl_turn_on(int width, int height, vrdl_display_type display_type);
-extern void vrdl_turn_off(void);
+VRDL_DECL bool vrdl_turn_on(int width, int height, vrdl_display_type display_type);
+VRDL_DECL void vrdl_turn_off(void);
 
-extern void vrdl_request_turn_off(void);
-extern bool vrdl_should_turn_off(void);
+VRDL_DECL void vrdl_request_turn_off(void);
+VRDL_DECL bool vrdl_should_turn_off(void);
 
-extern bool vrdl_set_resolution(uint32_t width, uint32_t height);
-extern bool vrdl_set_blanking(uint32_t hblank, uint32_t vblank);
-extern bool vrdl_set_resolution_and_blanking(uint32_t width, uint32_t height, uint32_t hblank, uint32_t vblank);
+VRDL_DECL bool vrdl_set_resolution(uint32_t width, uint32_t height);
+VRDL_DECL bool vrdl_set_blanking(uint32_t hblank, uint32_t vblank);
+VRDL_DECL bool vrdl_set_resolution_and_blanking(uint32_t width, uint32_t height, uint32_t hblank, uint32_t vblank);
 
-extern bool vrdl_is_on(void);
-extern bool vrdl_is_frame_active(void);
-extern bool vrdl_is_key_pressed(vrdl_key key);
-extern bool vrdl_is_fullscreen(void);
-extern bool vrdl_is_resizable(void);
+VRDL_DECL bool vrdl_is_on(void);
+VRDL_DECL bool vrdl_is_frame_active(void);
+VRDL_DECL bool vrdl_is_key_pressed(vrdl_key key);
+VRDL_DECL bool vrdl_is_fullscreen(void);
+VRDL_DECL bool vrdl_is_resizable(void);
 
-extern void vrdl_set_title(const char *title);
-extern void vrdl_set_display_size(int width, int height);
-extern void vrdl_set_display_pos(int x, int y);
-extern void vrdl_set_fullscreen(bool fullscreen);
-extern void vrdl_set_aspect_ratio(double aspect_ratio);
-extern void vrdl_set_resizable(bool resizable);
-extern void vrdl_set_frame_rate(double frame_rate);
+VRDL_DECL void vrdl_set_title(const char *title);
+VRDL_DECL void vrdl_set_display_size(int width, int height);
+VRDL_DECL void vrdl_set_display_pos(int x, int y);
+VRDL_DECL void vrdl_set_fullscreen(bool fullscreen);
+VRDL_DECL void vrdl_set_aspect_ratio(double aspect_ratio);
+VRDL_DECL void vrdl_set_resizable(bool resizable);
+VRDL_DECL void vrdl_set_frame_rate(double frame_rate);
 
-extern const char *vrdl_get_title(void);
-extern void vrdl_get_display_size(int *width, int *height);
-extern void vrdl_get_display_pos(int *x, int *y);
-extern double vrdl_get_aspect_ratio(void);
-extern double vrdl_get_frame_rate(void);
+VRDL_DECL const char *vrdl_get_title(void);
+VRDL_DECL void vrdl_get_display_size(int *width, int *height);
+VRDL_DECL void vrdl_get_display_pos(int *x, int *y);
+VRDL_DECL double vrdl_get_aspect_ratio(void);
+VRDL_DECL double vrdl_get_frame_rate(void);
 
-extern void vrdl_draw_pixel(vrdl_color color);
-extern void vrdl_draw_pixels(vrdl_color color, size_t count);
-extern void vrdl_draw_pixel_array(vrdl_color *color_array, size_t size);
+VRDL_DECL void vrdl_draw_pixel(vrdl_color color);
+VRDL_DECL void vrdl_draw_pixels(vrdl_color color, size_t count);
+VRDL_DECL void vrdl_draw_pixel_array(vrdl_color *color_array, size_t size);
 
-extern void vrdl_update_display(void);
+VRDL_DECL void vrdl_update_display(void);
 
 #ifdef __cplusplus
 }
@@ -194,6 +212,14 @@ extern void vrdl_update_display(void);
 
 #if defined(VRDL_IMPLEMENTATION) || defined(VGLIN_IMPLEMENTATION)
 #define VRDL_IMPLEMENTATION_INCLUDED (1)
+
+#ifndef VRDL_DEF
+    #ifdef VRDL_STATIC
+        #define VRDL_DEF static
+    #else
+        #define VRDL_DEF
+    #endif
+#endif
 
 #include <SDL3/SDL.h>
 
@@ -227,9 +253,9 @@ typedef struct {
     const bool *keyboard;
 } vrdl_state;
 
-static vrdl_state _vrdl = {0};
+VRDL_DEF vrdl_state _vrdl = {0};
 
-static void _vrdl_resize(void) {
+VRDL_DEF void _vrdl_resize(void) {
     dword width, height;
     SDL_GetWindowSize(_vrdl.display, &width, &height);
     
@@ -246,7 +272,7 @@ static void _vrdl_resize(void) {
     }
 }
 
-static bool _vrdl_update_image(void) {
+VRDL_DEF bool _vrdl_update_image(void) {
     uint32_t image_height;
 
     if (_vrdl.display_type) {
@@ -288,7 +314,7 @@ static bool _vrdl_update_image(void) {
     return true;
 }
 
-bool vrdl_turn_on(int width, int height, vrdl_display_type display_type) {
+VRDL_DEF bool vrdl_turn_on(int width, int height, vrdl_display_type display_type) {
     if (vrdl_is_on() ||
         display_type > VRDL_DISPLAY_TYPE_LCD
     ) return false;
@@ -329,7 +355,7 @@ bool vrdl_turn_on(int width, int height, vrdl_display_type display_type) {
 
     return true;
 }
-void vrdl_turn_off(void) {
+VRDL_DEF void vrdl_turn_off(void) {
     if (_vrdl.pixels) free(_vrdl.pixels);
     if (_vrdl.image) SDL_DestroyTexture(_vrdl.image);
     if (_vrdl.render) SDL_DestroyRenderer(_vrdl.render);
@@ -338,14 +364,14 @@ void vrdl_turn_off(void) {
     memset(&_vrdl, 0, sizeof(_vrdl));
 }
 
-void vrdl_request_turn_off(void) {
+VRDL_DEF void vrdl_request_turn_off(void) {
     _vrdl.should_turn_off = true;
 }
-bool vrdl_should_turn_off(void) {
+VRDL_DEF bool vrdl_should_turn_off(void) {
     return _vrdl.should_turn_off;
 }
 
-bool vrdl_set_resolution(uint32_t width, uint32_t height) {
+VRDL_DEF bool vrdl_set_resolution(uint32_t width, uint32_t height) {
     if (!vrdl_is_on() ||
         !(width && height)
     ) return false;
@@ -354,7 +380,7 @@ bool vrdl_set_resolution(uint32_t width, uint32_t height) {
     _vrdl.image_rect.h = height;
     return _vrdl_update_image();
 }
-bool vrdl_set_blanking(uint32_t hblank, uint32_t vblank) {
+VRDL_DEF bool vrdl_set_blanking(uint32_t hblank, uint32_t vblank) {
     if (!vrdl_is_on() ||
         _vrdl.display_type ||
         !(hblank && vblank) ||
@@ -365,7 +391,7 @@ bool vrdl_set_blanking(uint32_t hblank, uint32_t vblank) {
     _vrdl.blank.v = vblank;
     return _vrdl_update_image();
 }
-bool vrdl_set_resolution_and_blanking(uint32_t width, uint32_t height, uint32_t hblank, uint32_t vblank) {
+VRDL_DEF bool vrdl_set_resolution_and_blanking(uint32_t width, uint32_t height, uint32_t hblank, uint32_t vblank) {
     if (!vrdl_is_on() ||
         !(width && height)
     ) return false;
@@ -376,7 +402,7 @@ bool vrdl_set_resolution_and_blanking(uint32_t width, uint32_t height, uint32_t 
 
         return _vrdl_update_image();
     } else if (
-        (hblank && vblank) ||
+        (hblank && vblank) &&
         !((hblank & 1) || (vblank & 1))
     ) {
         _vrdl.image_rect.w = width;
@@ -388,39 +414,39 @@ bool vrdl_set_resolution_and_blanking(uint32_t width, uint32_t height, uint32_t 
     } else return false;
 }
 
-bool vrdl_is_on(void) {
+VRDL_DEF bool vrdl_is_on(void) {
     return SDL_WasInit(0) != 0;
 }
-bool vrdl_is_frame_active(void) {
+VRDL_DEF bool vrdl_is_frame_active(void) {
     return _vrdl.accumulator >= _vrdl.time_step;
 }
-bool vrdl_is_key_pressed(vrdl_key key) {
+VRDL_DEF bool vrdl_is_key_pressed(vrdl_key key) {
     return (_vrdl.keyboard && key < SDL_SCANCODE_COUNT) ? _vrdl.keyboard[key] : false;
 }
-bool vrdl_is_fullscreen(void) {
+VRDL_DEF bool vrdl_is_fullscreen(void) {
     return vrdl_is_on() ? SDL_GetWindowFlags(_vrdl.display) & SDL_WINDOW_FULLSCREEN : false;
 }
-bool vrdl_is_resizable(void) {
+VRDL_DEF bool vrdl_is_resizable(void) {
     return vrdl_is_on() ? SDL_GetWindowFlags(_vrdl.display) & SDL_WINDOW_RESIZABLE : false;
 }
 
-void vrdl_set_title(const char *title) {
+VRDL_DEF void vrdl_set_title(const char *title) {
     if (vrdl_is_on())
         SDL_SetWindowTitle(_vrdl.display, title);
 }
-void vrdl_set_display_size(int width, int height) {
+VRDL_DEF void vrdl_set_display_size(int width, int height) {
     if (vrdl_is_on())
         SDL_SetWindowSize(_vrdl.display, width, height);
 }
-void vrdl_set_display_pos(int x, int y) {
+VRDL_DEF void vrdl_set_display_pos(int x, int y) {
     if (vrdl_is_on())
         SDL_SetWindowPosition(_vrdl.display, x, y);
 }
-void vrdl_set_fullscreen(bool fullscreen) {
+VRDL_DEF void vrdl_set_fullscreen(bool fullscreen) {
     if (vrdl_is_on())
         SDL_SetWindowFullscreen(_vrdl.display, fullscreen);
 }
-void vrdl_set_aspect_ratio(double aspect_ratio) {
+VRDL_DEF void vrdl_set_aspect_ratio(double aspect_ratio) {
     if (aspect_ratio) _vrdl.aspect_ratio = aspect_ratio;
     else {
         int width, height;
@@ -429,27 +455,27 @@ void vrdl_set_aspect_ratio(double aspect_ratio) {
     }
     _vrdl_resize();
 }
-void vrdl_set_resizable(bool resizable) {
+VRDL_DEF void vrdl_set_resizable(bool resizable) {
     if (vrdl_is_on()) SDL_SetWindowResizable(_vrdl.display, resizable);
 }
-void vrdl_set_frame_rate(double frame_rate) {
+VRDL_DEF void vrdl_set_frame_rate(double frame_rate) {
     _vrdl.frame_rate = frame_rate;
     _vrdl.time_step = 1.0 / frame_rate;
 }
 
-const char *vrdl_get_title(void) {
+VRDL_DEF const char *vrdl_get_title(void) {
     return vrdl_is_on() ? SDL_GetWindowTitle(_vrdl.display) : NULL;
 }
-void vrdl_get_display_size(int *width, int *height) {
+VRDL_DEF void vrdl_get_display_size(int *width, int *height) {
     if (vrdl_is_on())
         SDL_GetWindowSize(_vrdl.display, width, height);
 }
-void vrdl_get_display_pos(int *x, int *y) {
+VRDL_DEF void vrdl_get_display_pos(int *x, int *y) {
     if (vrdl_is_on())
         SDL_GetWindowPosition(_vrdl.display, x, y);
 }
-double vrdl_get_aspect_ratio(void) { return _vrdl.aspect_ratio; }
-double vrdl_get_frame_rate(void) { return _vrdl.frame_rate; }
+VRDL_DEF double vrdl_get_aspect_ratio(void) { return _vrdl.aspect_ratio; }
+VRDL_DEF double vrdl_get_frame_rate(void) { return _vrdl.frame_rate; }
 
 #define _draw_pixel(color) \
     _vrdl.pixels[_vrdl.beam++] = color; \
@@ -459,17 +485,17 @@ double vrdl_get_frame_rate(void) { return _vrdl.frame_rate; }
             _vrdl.accumulator -= _vrdl.time_step; \
     }
 
-void vrdl_draw_pixel(vrdl_color color) {
+VRDL_DEF void vrdl_draw_pixel(vrdl_color color) {
     if (_vrdl.image) {_draw_pixel(color)}
 }
-void vrdl_draw_pixels(vrdl_color color, size_t count) {
+VRDL_DEF void vrdl_draw_pixels(vrdl_color color, size_t count) {
     if (_vrdl.image) for (size_t i = 0; i < count; ++i) {_draw_pixel(color)}
 }
-void vrdl_draw_pixel_array(vrdl_color *color_array, size_t size) {
+VRDL_DEF void vrdl_draw_pixel_array(vrdl_color *color_array, size_t size) {
     if (_vrdl.image && color_array) for (size_t i = 0; i < size;) {_draw_pixel(color_array[i++])}
 }
 
-void vrdl_update_display(void) {
+VRDL_DEF void vrdl_update_display(void) {
     if (!vrdl_is_on()) return;
 
     uint64_t frame_start = SDL_GetPerformanceCounter();
