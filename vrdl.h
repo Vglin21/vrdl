@@ -192,7 +192,7 @@ extern void vrdl_update_display(void);
 }
 #endif
 
-#ifdef VRDL_IMPLEMENTATION
+#if defined(VRDL_IMPLEMENTATION) || defined(VGLIN_IMPLEMENTATION)
 #define VRDL_IMPLEMENTATION_INCLUDED (1)
 
 #include <SDL3/SDL.h>
